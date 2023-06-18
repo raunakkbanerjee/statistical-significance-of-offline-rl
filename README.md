@@ -1,1 +1,1 @@
-# statistical-significance-of-offline-rl
+# statistical significance of offline rl
