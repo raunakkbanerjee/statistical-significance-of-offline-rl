@@ -4,6 +4,10 @@ import gym
 from d3rlpy.metrics.scorer import evaluate_on_environment
 import argparse
 import os
+from tqdm import tqdm
+#import wandb
+
+#wandb.login()
 
 
 os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
@@ -15,8 +19,17 @@ args = parser.parse_args()
 task = args.task #['HalfCheetah-v4', 'Walker2d-v4', 'Ant-v4']
 algo = args.algo
 
+#wandb.init(
+#    project=f"{algo}_{task}"
+#    config={
+#    "n": 100,
+#    "n_trials": 100
+#    })
 
-class MODEL():
+with open(f'sanity_check.txt', 'w') as f:
+    f.write(f"{algo}_{task}\n")
+
+class Model():
     def __init__(self, task, algo, gpu=True):
         self.mean_results = []
         self.task = task 
@@ -35,22 +48,28 @@ class MODEL():
         elif self.algo == "COMBO":
             self.engine = d3rlpy.algos.COMBO(**self.f_params)
 
-    def train(self, n=100, n_steps=1000000, save_interval=100, save_metrics=False, verbose=False):
+    def train(self, n=100, n_steps=1000000, n_trials=100, save_interval=101, save_metrics=False, verbose=False):
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
             d3rlpy.seed(i)
-            env.seed(i)
-            online_env.seed(i)
+            env.reset(seed=i)
+            online_env.reset(seed=i)
             self.set_engine()
 
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
-            self.engine.save_model("./saved_models/iql_{}_{}_{}.pt".format(algo, task, i))
-            scorer = evaluate_on_environment(online_env, n_trials=100)
-            self.mean_results.append(scorer(self.engine))
+            #self.engine.save_model("./saved_models/{}_{}_{}.pt".format(algo, task, i))
+            scorer = evaluate_on_environment(online_env, n_trials=n_trials)
+            normalized_score = online_env.get_normalized_score(scorer(self.engine))
+            f = open(f'{algo}_{task}.txt', 'a+')
+            f.write(f"{normalized_score}\n")
+            self.mean_results.append(normalized_score)
         return self.mean_results
     
 
-model = MODEL(task, algo)
-mean_results = model.train()
+model = Model(task, algo)
+mean_results = model.train(n=100, n_steps=1000000, n_trials=100)
 
+#with open(f'{algo}_{task}.txt', 'w') as f:
+#    for r in mean_results:
+#        f.write(f"{r}\n")
