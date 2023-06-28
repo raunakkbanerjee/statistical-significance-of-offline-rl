@@ -52,9 +52,9 @@ class Model():
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
-            d3rlpy.seed(i)
-            env.reset(seed=i)
-            online_env.reset(seed=i)
+            d3rlpy.seed(i+100)
+            env.reset(seed=i+100)
+            online_env.reset(seed=i+100)
             self.set_engine()
 
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)

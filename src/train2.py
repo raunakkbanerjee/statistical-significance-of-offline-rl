@@ -73,7 +73,7 @@ class Model():
     
 
 model = Model(task, algo)
-mean_results = model.train(n=10, n_steps=1000000)
+mean_results = model.train(n=10)
 
 #with open(f'{algo}_{task}.txt', 'w') as f:
 #    for r in mean_results:
