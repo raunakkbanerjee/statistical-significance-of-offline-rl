@@ -1,6 +1,7 @@
 d3rlpy_logs/
 d3rlpy_data/
 saved_models/
+wandb/
 example.py
 results.txt
 
