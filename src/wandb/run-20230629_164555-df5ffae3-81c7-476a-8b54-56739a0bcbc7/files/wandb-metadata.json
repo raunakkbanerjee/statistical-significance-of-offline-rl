@@ -1,0 +1,77 @@
+{
+    "os": "Linux-3.10.0-1160.88.1.el7.x86_64-x86_64-with-glibc2.17",
+    "python": "3.10.9",
+    "heartbeatAt": "2023-06-29T15:45:55.829528",
+    "startedAt": "2023-06-29T15:45:55.045428",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/cluster/student4/ml/2022/rbanerje/MSc_project/statistical_significance_of_offline_rl/src/dt.py",
+    "codePath": "src/dt.py",
+    "git": {
+        "remote": "https://github.com/raunakkbanerjee/statistical_significance_of_offline_rl.git",
+        "commit": "6bc3c4f9e08e9fb822c3498e37f59d018606492d"
+    },
+    "email": null,
+    "root": "/cluster/student4/ml/2022/rbanerje/MSc_project/statistical_significance_of_offline_rl",
+    "host": "beaker.cs.ucl.ac.uk",
+    "username": "rbanerje",
+    "executable": "/home/rbanerje/.conda/envs/gpu/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2397.222,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2397.222,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "total": 38.323509216308594,
+        "used": 6.122409820556641
+    },
+    "memory": {
+        "total": 7.635700225830078
+    }
+}
