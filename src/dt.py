@@ -495,7 +495,8 @@ def train(config: TrainConfig):
         )
 
         # validation in the env for the actual online performance
-        if step % config.eval_every == 0 or step == config.update_steps - 1:
+        # if step % config.eval_every == 0 or step == config.update_steps - 1:
+        if step == config.update_steps - 1: #check model performance by rolling out episodes after model is trained i.e after all updates
             model.eval()
             for target_return in config.target_returns:
                 eval_env.seed(config.eval_seed)
@@ -513,6 +514,12 @@ def train(config: TrainConfig):
                 normalized_scores = (
                     eval_env.get_normalized_score(np.array(eval_returns)) * 100
                 )
+                for score in normalized_scores:
+                    wandb.log(
+                        {
+                            f"{target_return}_episodic_return": score
+                        }
+                    )
                 wandb.log(
                     {
                         f"eval/{target_return}_return_mean": np.mean(eval_returns),
@@ -539,3 +546,4 @@ def train(config: TrainConfig):
 
 if __name__ == "__main__":
     train()
+    eval_rollout() #rollout episodes after training
