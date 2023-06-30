@@ -501,7 +501,7 @@ def train(config: TrainConfig):
             for target_return in config.target_returns:
                 eval_env.seed(config.eval_seed)
                 eval_returns = []
-                for _ in trange(config.eval_episodes, desc="Evaluation", leave=False):
+                for i in trange(config.eval_episodes, desc="Evaluation", leave=False):
                     eval_return, eval_len = eval_rollout(
                         model=model,
                         env=eval_env,
@@ -517,7 +517,7 @@ def train(config: TrainConfig):
                 for score in normalized_scores:
                     wandb.log(
                         {
-                            f"{target_return}_episodic_return": score
+                            f"{target_return} rollout no. {i}": score
                         }
                     )
                 wandb.log(
