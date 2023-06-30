@@ -19,6 +19,7 @@ from torch.utils.data import DataLoader, IterableDataset
 from tqdm.auto import tqdm, trange  # noqa
 import wandb
 
+os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 
 @dataclass
 class TrainConfig:
