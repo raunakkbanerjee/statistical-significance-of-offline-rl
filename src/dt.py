@@ -18,10 +18,13 @@ from torch.nn import functional as F  # noqa
 from torch.utils.data import DataLoader, IterableDataset
 from tqdm.auto import tqdm, trange  # noqa
 import wandb
-import argparse
+#import argparse
 
+os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 
-
+#parser = argparse.ArgumentParser()
+#parser.add_argument("--task", type=str, help="task/game to be played")
+#args = parser.parse_args()
 
 @dataclass
 class TrainConfig:
