@@ -28,9 +28,6 @@ algo = args.algo
 #    "n_trials": 100
 #    })
 
-with open(f'sanity_check.txt', 'w') as f:
-    f.write(f"{algo}_{task}\n")
-
 class Model():
     def __init__(self, task, algo, gpu=True):
         self.mean_results = []
