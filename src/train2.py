@@ -4,6 +4,8 @@ import d3rlpy
 from d3rlpy.datasets import get_d4rl
 import gym
 from d3rlpy.metrics.scorer import evaluate_on_environment
+from d3rlpy.dynamics import ProbabilisticEnsembleDynamics
+from sklearn.model_selection import train_test_split
 import argparse
 import os
 from tqdm import tqdm
@@ -36,14 +38,16 @@ class Model():
         self.f_params = {"use_gpu": gpu}
         self.engine = None
 
-    def set_engine(self):
+    def set_engine(self, dataset):
         if self.algo == "IQL":
             self.engine = d3rlpy.algos.IQL(**self.f_params)
         elif self.algo == "CQL":
             # self.f_params["actor_learning_rate"] = 3e-5
             self.engine = d3rlpy.algos.CQL(**self.f_params)
         elif self.algo == "MOPO":
-            self.engine = d3rlpy.algos.MOPO(**self.f_params)     
+            self.engine = d3rlpy.dynamics.ProbabilisticEnsembleDynamics(learning_rate=1e-4, use_gpu=True)
+            self.train_episodes, self.test_episodes = train_test_split(dataset)
+            # self.engine = d3rlpy.algos.MOPO(**self.f_params)     
         elif self.algo == "COMBO":
             self.engine = d3rlpy.algos.COMBO(**self.f_params)
 
@@ -54,11 +58,14 @@ class Model():
             d3rlpy.seed(i)
             env.reset(seed=i)
             online_env.reset(seed=i)
-            self.set_engine()
-
-            self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
+            self.set_engine(dataset)
+            if self.algo == "COMBO" or self.algo == "MOPO":
+                self.engine.fit(self.train_episodes, eval_episodes=self.test_episodes, n_steps=n_steps, 
+                save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)                
+            else:
+                self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
-            f = open(f'{algo}_{task}_rollout.txt', 'a+')
+            f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
             f.write(f"n={i}\n")
             #self.engine.save_model("./saved_models/{}_{}_{}.pt".format(algo, task, i))
             for i in range(1000):       
