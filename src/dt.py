@@ -545,4 +545,4 @@ def train(config: TrainConfig):
 
 
 if __name__ == "__main__":
-    train()
+    train() 
