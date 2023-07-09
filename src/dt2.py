@@ -49,14 +49,13 @@ class TrainConfig:
     reward_scale: float = 0.001
     num_workers: int = 4
     # evaluation params
-    target_returns: Tuple[float, ...] = (12000.0, 6000.0)
-    eval_episodes: int = 100
+    target_returns: Tuple[float, ...] = (12000.0) #(12000.0, 6000.0)
+    eval_episodes: int = 1000
     eval_every: int = 10_000
     # general params
     training_seeds: int = 50
     checkpoints_path: Optional[str] = None
     deterministic_torch: bool = False
-    train_seed: int = 10
     eval_seed: int = 42
     device: str = "cuda"
 
@@ -407,64 +406,66 @@ def eval_rollout(
 
 @pyrallis.wrap()
 def train(config: TrainConfig):
-    set_seed(config.train_seed, deterministic_torch=config.deterministic_torch)
     # init wandb session for logging
     wandb_init(asdict(config))
-
-    # data & dataloader setup
-    dataset = SequenceDataset(
-        config.env_name, seq_len=config.seq_len, reward_scale=config.reward_scale
-    )
-    trainloader = DataLoader(
-        dataset,
-        batch_size=config.batch_size,
-        pin_memory=True,
-        num_workers=config.num_workers,
-    )
-    # evaluation environment with state & reward preprocessing (as in dataset above)
-    eval_env = wrap_env(
-        env=gym.make(config.env_name),
-        state_mean=dataset.state_mean,
-        state_std=dataset.state_std,
-        reward_scale=config.reward_scale,
-    )
-    # model & optimizer & scheduler setup
-    config.state_dim = eval_env.observation_space.shape[0]
-    config.action_dim = eval_env.action_space.shape[0]
-    model = DecisionTransformer(
-        state_dim=config.state_dim,
-        action_dim=config.action_dim,
-        embedding_dim=config.embedding_dim,
-        seq_len=config.seq_len,
-        episode_len=config.episode_len,
-        num_layers=config.num_layers,
-        num_heads=config.num_heads,
-        attention_dropout=config.attention_dropout,
-        residual_dropout=config.residual_dropout,
-        embedding_dropout=config.embedding_dropout,
-        max_action=config.max_action,
-    ).to(config.device)
-
-    optim = torch.optim.AdamW(
-        model.parameters(),
-        lr=config.learning_rate,
-        weight_decay=config.weight_decay,
-        betas=config.betas,
-    )
-    scheduler = torch.optim.lr_scheduler.LambdaLR(
-        optim,
-        lambda steps: min((steps + 1) / config.warmup_steps, 1),
-    )
-    # save config to the checkpoint
-    if config.checkpoints_path is not None:
-        print(f"Checkpoints path: {config.checkpoints_path}")
-        os.makedirs(config.checkpoints_path, exist_ok=True)
-        with open(os.path.join(config.checkpoints_path, "config.yaml"), "w") as f:
-            pyrallis.dump(config, f)
-
-    print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
-    trainloader_iter = iter(trainloader)
     for seed in range(config.training_seeds): #Training from scratch multiple times
+        set_seed(seed, deterministic_torch=config.deterministic_torch)
+        
+
+        # data & dataloader setup
+        dataset = SequenceDataset(
+            config.env_name, seq_len=config.seq_len, reward_scale=config.reward_scale
+        )
+        trainloader = DataLoader(
+            dataset,
+            batch_size=config.batch_size,
+            pin_memory=True,
+            num_workers=config.num_workers,
+        )
+        # evaluation environment with state & reward preprocessing (as in dataset above)
+        eval_env = wrap_env(
+            env=gym.make(config.env_name),
+            state_mean=dataset.state_mean,
+            state_std=dataset.state_std,
+            reward_scale=config.reward_scale,
+        )
+        # model & optimizer & scheduler setup
+        config.state_dim = eval_env.observation_space.shape[0]
+        config.action_dim = eval_env.action_space.shape[0]
+        model = DecisionTransformer(
+            state_dim=config.state_dim,
+            action_dim=config.action_dim,
+            embedding_dim=config.embedding_dim,
+            seq_len=config.seq_len,
+            episode_len=config.episode_len,
+            num_layers=config.num_layers,
+            num_heads=config.num_heads,
+            attention_dropout=config.attention_dropout,
+            residual_dropout=config.residual_dropout,
+            embedding_dropout=config.embedding_dropout,
+            max_action=config.max_action,
+        ).to(config.device)
+
+        optim = torch.optim.AdamW(
+            model.parameters(),
+            lr=config.learning_rate,
+            weight_decay=config.weight_decay,
+            betas=config.betas,
+        )
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optim,
+            lambda steps: min((steps + 1) / config.warmup_steps, 1),
+        )
+        # save config to the checkpoint
+        if config.checkpoints_path is not None:
+            print(f"Checkpoints path: {config.checkpoints_path}")
+            os.makedirs(config.checkpoints_path, exist_ok=True)
+            with open(os.path.join(config.checkpoints_path, "config.yaml"), "w") as f:
+                pyrallis.dump(config, f)
+
+        print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
+        trainloader_iter = iter(trainloader)
+    
         for step in trange(config.update_steps, desc="Training"):
             batch = next(trainloader_iter)
             states, actions, returns, time_steps, mask = [b.to(config.device) for b in batch]
