@@ -24,7 +24,7 @@ os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 @dataclass
 class TrainConfig:
     # wandb params
-    project: str = "CORL"
+    project: str = "CORL_take2"
     group: str = "DT-D4RL"
     name: str = "DT"
     # model params
@@ -545,5 +545,4 @@ def train(config: TrainConfig):
 
 
 if __name__ == "__main__":
-    train()
-    #eval_rollout() #rollout episodes after training
+    train() 
