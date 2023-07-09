@@ -62,7 +62,7 @@ class Model():
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
             f = open(f'{algo}_{task}_rollout.txt', 'a+')
-            f.write(f"n={n}\n")
+            f.write(f"n={i}\n")
             #self.engine.save_model("./saved_models/{}_{}_{}.pt".format(algo, task, i))
             for i in range(1000):       
                 normalized_score = online_env.get_normalized_score(scorer(self.engine))

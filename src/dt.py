@@ -546,4 +546,4 @@ def train(config: TrainConfig):
 
 if __name__ == "__main__":
     train()
-    eval_rollout() #rollout episodes after training
+    #eval_rollout() #rollout episodes after training
