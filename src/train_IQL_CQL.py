@@ -1,3 +1,5 @@
+'''This file trains using MOPO and COMBO algorithm'''
+
 #This training script generates multiple trajectories and notes the score. So, we get 100 scores instead of noting just the mean score.
 
 import d3rlpy
@@ -49,21 +51,19 @@ class Model():
             self.train_episodes, self.test_episodes = train_test_split(dataset)
             # self.engine = d3rlpy.algos.MOPO(**self.f_params)     
         elif self.algo == "COMBO":
-            self.engine = d3rlpy.algos.COMBO(**self.f_params)
+            self.engine = d3rlpy.dynamics.ProbabilisticEnsembleDynamics(learning_rate=1e-4, use_gpu=True)
+            self.train_episodes, self.test_episodes = train_test_split(dataset)
+            # self.engine = d3rlpy.algos.COMBO(**self.f_params)
 
-    def train(self, n=100, n_steps=1000000, save_interval=101, save_metrics=False, verbose=False):
+    def train(self, n=20, n_steps=1000000, save_interval=101, save_metrics=False, verbose=False):
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
             d3rlpy.seed(i)
             env.reset(seed=i)
             online_env.reset(seed=i)
-            self.set_engine(dataset)
-            if self.algo == "COMBO" or self.algo == "MOPO":
-                self.engine.fit(self.train_episodes, eval_episodes=self.test_episodes, n_steps=n_steps, 
-                save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)                
-            else:
-                self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
+            self.set_engine(dataset)               
+            self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
             f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
             f.write(f"n={i}\n")
@@ -77,7 +77,7 @@ class Model():
     
 
 model = Model(task, algo)
-mean_results = model.train(n=10)
+mean_results = model.train(n=20)
 
 #with open(f'{algo}_{task}.txt', 'w') as f:
 #    for r in mean_results:
