@@ -57,6 +57,7 @@ class Model():
         self.algo = algo
         self.dynamics = None
         self.f_params = {}
+        self.experiment_name = f"{self.algo}_{self.task}"
 
     def set_engine(self):
         if self.algo == "MOPO":
@@ -88,7 +89,7 @@ class Model():
         self.dynamics = d3rlpy.dynamics.ProbabilisticEnsembleDynamics(learning_rate=1e-4, use_gpu=True)
         train_episodes, test_episodes = train_test_split(self.dataset)
         self.dynamics.fit(train_episodes, eval_episodes=test_episodes, n_epochs=n_epochs, 
-        save_interval=save_interval, save_metrics=save_metrics, verbose=verbose, with_timestamp=with_timestamp)         
+        save_interval=save_interval, save_metrics=save_metrics, verbose=verbose, with_timestamp=with_timestamp, experiment_name=self.experiment_name)
             
 
     def train_engine(self, n_steps=1000000, save_interval=101, save_metrics=False, verbose=False):
@@ -106,8 +107,10 @@ class Model():
 
             self.train_dynamics(n_epochs=n_epochs, save_interval=save_dynamics_interval, save_metrics=save_dynamics_metrics, verbose=verbose, with_timestamp=with_timestamp)
             # load trained dynamics model
-            self.dynamics = ProbabilisticEnsembleDynamics.from_json('./d3rlpy_logs/ProbabilisticEnsembleDynamics/params.json')
-            self.dynamics.load_model('./d3rlpy_logs/ProbabilisticEnsembleDynamics/model_7464.pt')
+            json_path = f'./d3rlpy_logs/{self.experiment_name}/params.json'
+            model_path = f'./d3rlpy_logs/{self.experiment_name}/model_7464.pt'
+            self.dynamics = ProbabilisticEnsembleDynamics.from_json(json_path)
+            self.dynamics.load_model(model_path)
             self.train_engine(n_steps=n_steps, save_interval=save_engine_interval, save_metrics=save_engine_metrics, verbose=verbose)
             scorer = evaluate_on_environment(self.online_env, n_trials=1)
             f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
