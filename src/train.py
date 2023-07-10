@@ -26,8 +26,8 @@ algo = args.algo
 #    "n_trials": 100
 #    })
 
-with open(f'sanity_check.txt', 'w') as f:
-    f.write(f"{algo}_{task}\n")
+#with open(f'sanity_check.txt', 'w') as if:
+#    f.write(f"{algo}_{task}\n")
 
 class Model():
     def __init__(self, task, algo, gpu=True):
@@ -52,16 +52,16 @@ class Model():
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
-            d3rlpy.seed(i+100)
-            env.reset(seed=i+100)
-            online_env.reset(seed=i+100)
+            d3rlpy.seed(i+2000)
+            env.reset(seed=i+2000)
+            online_env.reset(seed=i+2000)
             self.set_engine()
 
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             #self.engine.save_model("./saved_models/{}_{}_{}.pt".format(algo, task, i))
             scorer = evaluate_on_environment(online_env, n_trials=n_trials)
             normalized_score = online_env.get_normalized_score(scorer(self.engine))
-            f = open(f'{algo}_{task}.txt', 'a+')
+            f = open(f'./txt_files/{algo}_{task}.txt', 'a+')
             f.write(f"{normalized_score}\n")
             self.mean_results.append(normalized_score)
         return self.mean_results

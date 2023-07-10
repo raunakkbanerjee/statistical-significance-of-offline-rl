@@ -70,7 +70,7 @@ class Model():
             #self.engine.save_model("./saved_models/{}_{}_{}.pt".format(algo, task, i))
             for i in range(1000):       
                 normalized_score = online_env.get_normalized_score(scorer(self.engine))
-                f = open(f'{algo}_{task}_rollout.txt', 'a+')
+                f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
                 f.write(f"{normalized_score}\n")
             self.mean_results.append(normalized_score)
         return self.mean_results
