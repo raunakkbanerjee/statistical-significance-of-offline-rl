@@ -84,11 +84,11 @@ class Model():
             self.engine = d3rlpy.algos.COMBO(self.dynamics, **self.f_params)
         
 
-    def train_dynamics(self, n_epochs=100, save_interval=100, save_metrics=True, verbose=False):
+    def train_dynamics(self, n_epochs=100, save_interval=100, save_metrics=True, verbose=False, with_timestamp=False):
         self.dynamics = d3rlpy.dynamics.ProbabilisticEnsembleDynamics(learning_rate=1e-4, use_gpu=True)
         train_episodes, test_episodes = train_test_split(self.dataset)
         self.dynamics.fit(train_episodes, eval_episodes=test_episodes, n_epochs=n_epochs, 
-        save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)         
+        save_interval=save_interval, save_metrics=save_metrics, verbose=verbose, with_timestamp=with_timestamp)         
             
 
     def train_engine(self, n_steps=1000000, save_interval=101, save_metrics=False, verbose=False):
@@ -96,7 +96,7 @@ class Model():
         self.engine.fit(self.dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
     
     def train(self, n=50, n_epochs=100, n_steps=1000000, save_engine_interval=101, save_dynamics_interval=100,
-               save_dynamics_metrics=True, save_engine_metrics=True, verbose=False):
+               save_dynamics_metrics=True, save_engine_metrics=False, verbose=False, with_timestamp=False):
         for i in range(n):
             self.dataset, self.env = get_d4rl(self.task)
             self.online_env = gym.make(self.task)
@@ -104,7 +104,7 @@ class Model():
             self.env.reset(seed=i)
             self.online_env.reset(seed=i)
 
-            self.train_dynamics(n_epochs=n_epochs, save_interval=save_dynamics_interval, save_metrics=save_dynamics_metrics, verbose=verbose)
+            self.train_dynamics(n_epochs=n_epochs, save_interval=save_dynamics_interval, save_metrics=save_dynamics_metrics, verbose=verbose, with_timestamp=with_timestamp)
             # load trained dynamics model
             self.dynamics = ProbabilisticEnsembleDynamics.from_json('./d3rlpy_logs/ProbabilisticEnsembleDynamics/params.json')
             self.dynamics.load_model('./d3rlpy_logs/ProbabilisticEnsembleDynamics/model_7464.pt')
@@ -122,4 +122,3 @@ class Model():
 
 model = Model(task, algo)
 model.train(n=50)
-
