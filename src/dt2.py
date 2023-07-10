@@ -49,7 +49,7 @@ class TrainConfig:
     reward_scale: float = 0.001
     num_workers: int = 4
     # evaluation params
-    target_returns: Tuple[float, ...] = (12000.0) #(12000.0, 6000.0)
+    target_return: float = 12000.0 #(12000.0, 6000.0)
     eval_episodes: int = 1000
     eval_every: int = 10_000
     # general params
@@ -501,40 +501,40 @@ def train(config: TrainConfig):
             # if step % config.eval_every == 0 or step == config.update_steps - 1:
             if step == config.update_steps - 1: #check model performance by rolling out episodes after model is trained i.e after all updates
                 model.eval()
-                for target_return in config.target_returns:
-                    eval_env.seed(config.eval_seed)
-                    eval_returns = []
-                    for i in trange(config.eval_episodes, desc="Evaluation", leave=False):
-                        eval_return, eval_len = eval_rollout(
-                            model=model,
-                            env=eval_env,
-                            target_return=target_return * config.reward_scale,
-                            device=config.device,
-                        )
-                        # unscale for logging & correct normalized score computation
-                        eval_returns.append(eval_return / config.reward_scale)
-
-                    normalized_scores = (
-                        eval_env.get_normalized_score(np.array(eval_returns)) * 100
+                target_return = config.target_return
+                eval_env.seed(config.eval_seed)
+                eval_returns = []
+                for i in trange(config.eval_episodes, desc="Evaluation", leave=False):
+                    eval_return, eval_len = eval_rollout(
+                        model=model,
+                        env=eval_env,
+                        target_return=target_return * config.reward_scale,
+                        device=config.device,
                     )
-                    for score in normalized_scores:
-                        wandb.log(
-                            {
-                                f"{target_return} rollout no. {i}": score
-                            }
-                        )
+                    # unscale for logging & correct normalized score computation
+                    eval_returns.append(eval_return / config.reward_scale)
+
+                normalized_scores = (
+                    eval_env.get_normalized_score(np.array(eval_returns)) * 100
+                )
+                for score in normalized_scores:
                     wandb.log(
                         {
-                            f"eval/{target_return}_return_mean": np.mean(eval_returns),
-                            f"eval/{target_return}_return_std": np.std(eval_returns),
-                            f"eval/{target_return}_normalized_score_mean": np.mean(
-                                normalized_scores
-                            ),
-                            f"eval/{target_return}_normalized_score_std": np.std(
-                                normalized_scores
-                            ),
+                            f"{target_return} rollout no. {i}": score
                         }
                     )
+                wandb.log(
+                    {
+                        f"eval/{target_return}_return_mean": np.mean(eval_returns),
+                        f"eval/{target_return}_return_std": np.std(eval_returns),
+                        f"eval/{target_return}_normalized_score_mean": np.mean(
+                            normalized_scores
+                        ),
+                        f"eval/{target_return}_normalized_score_std": np.std(
+                            normalized_scores
+                        ),
+                    }
+                )
                 model.train()
 
         if config.checkpoints_path is not None:
