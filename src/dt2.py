@@ -24,7 +24,7 @@ os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 @dataclass
 class TrainConfig:
     # wandb params
-    project: str = "CORL_take2"
+    project: str = "CORL_take3"
     group: str = "DT-D4RL"
     name: str = "DT"
     # model params

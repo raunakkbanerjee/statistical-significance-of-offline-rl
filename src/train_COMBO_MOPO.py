@@ -70,7 +70,7 @@ class Model():
             elif self.algo == "walker2d-medium-replay-v2" or self.algo == "walker2d-medium-expert-v2":
                 self.f_params = {'rollout_length': 1, 'penalty_coef': 2.5}            
 
-            self.engine = d3rlpy.algos.MOPO(self.dynamics, **self.f_params)     
+            self.engine = d3rlpy.algos.MOPO(dynamics=self.dynamics, **self.f_params)     
 
         elif self.algo == "COMBO":
             if self.algo == "halfcheetah-medium-v2" or self.algo == "halfcheetah-medium-replay-v2" or self.algo == "hopper-medium-replay-v2":
@@ -82,7 +82,7 @@ class Model():
             elif self.algo == "walker2d-medium-replay-v2":
                 self.f_params = {'rollout_length': 1, 'cql_weight': 0.5}
 
-            self.engine = d3rlpy.algos.COMBO(self.dynamics, **self.f_params)
+            self.engine = d3rlpy.algos.COMBO(dynamics=self.dynamics, **self.f_params)
         
 
     def train_dynamics(self, n_epochs=100, save_interval=100, save_metrics=True, verbose=False, with_timestamp=False):
@@ -96,7 +96,7 @@ class Model():
         self.set_engine()
         self.engine.fit(self.dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
     
-    def train(self, n=50, n_epochs=100, n_steps=1000000, save_engine_interval=101, save_dynamics_interval=100,
+    def train(self, n=50, n_epochs=100, n_steps=1000000, save_engine_interval=100, save_dynamics_interval=100,
                save_dynamics_metrics=True, save_engine_metrics=False, verbose=False, with_timestamp=False):
         for i in range(n):
             self.dataset, self.env = get_d4rl(self.task)
@@ -108,7 +108,17 @@ class Model():
             self.train_dynamics(n_epochs=n_epochs, save_interval=save_dynamics_interval, save_metrics=save_dynamics_metrics, verbose=verbose, with_timestamp=with_timestamp)
             # load trained dynamics model
             json_path = f'./d3rlpy_logs/{self.experiment_name}/params.json'
-            model_path = f'./d3rlpy_logs/{self.experiment_name}/model_7464.pt'
+            source_directory = f'./d3rlpy_logs/{self.experiment_name}'
+            keyword = "model"
+
+            # Iterate over each file in the directory
+            for root, dirs, files in os.walk(source_directory):
+                for filename in files:
+                    # Check if the file name contains the keyword "model"
+                    if keyword in filename:
+                        # Get the full path of the file
+                        model_path = os.path.join(root, filename)
+		    		    
             self.dynamics = ProbabilisticEnsembleDynamics.from_json(json_path)
             self.dynamics.load_model(model_path)
             self.train_engine(n_steps=n_steps, save_interval=save_engine_interval, save_metrics=save_engine_metrics, verbose=verbose)
@@ -118,7 +128,7 @@ class Model():
 
             for i in range(1000):       
                 normalized_score = self.online_env.get_normalized_score(scorer(self.engine))
-                f = open(f'{algo}_{task}_rollout.txt', 'a+')
+                f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
                 f.write(f"{normalized_score}\n")
 
     
