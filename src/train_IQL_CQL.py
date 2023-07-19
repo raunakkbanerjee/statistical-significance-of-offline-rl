@@ -45,6 +45,7 @@ class Model():
             self.engine = d3rlpy.algos.IQL(**self.f_params)
         elif self.algo == "CQL":
             # self.f_params["actor_learning_rate"] = 3e-5
+            self.f_params["alpha_threshold"] = -1 
             self.engine = d3rlpy.algos.CQL(**self.f_params)
         elif self.algo == "MOPO":
             self.engine = d3rlpy.dynamics.ProbabilisticEnsembleDynamics(learning_rate=1e-4, use_gpu=True)
@@ -65,12 +66,12 @@ class Model():
             self.set_engine(dataset)               
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
-            f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
+            f = open(f'./txt_files_2/{algo}_{task}_rollout.txt', 'a+')
             f.write(f"n={i}\n")
             #self.engine.save_model("./saved_models/{}_{}_{}.pt".format(algo, task, i))
             for i in range(1000):       
                 normalized_score = online_env.get_normalized_score(scorer(self.engine))
-                f = open(f'./txt_files/{algo}_{task}_rollout.txt', 'a+')
+                f = open(f'./txt_files_2/{algo}_{task}_rollout.txt', 'a+')
                 f.write(f"{normalized_score}\n")
             self.mean_results.append(normalized_score)
         return self.mean_results
