@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 import argparse
 import os
 from tqdm import tqdm
+import random
 #import wandb
 
 #wandb.login()
@@ -42,10 +43,16 @@ class Model():
 
     def set_engine(self, dataset):
         if self.algo == "IQL":
+            if "cloned" in self.task: 
+                self.f_params["weight_temp"] = 0.5
+            else:
+                self.f_params["expectile"] = 0.9
+                self.f_params["weight_temp"] = 10
+ 
             self.engine = d3rlpy.algos.IQL(**self.f_params)
         elif self.algo == "CQL":
             # self.f_params["actor_learning_rate"] = 3e-5
-            self.f_params["alpha_threshold"] = -1 
+            self.f_params["alpha_threshold"] = 5 
             self.engine = d3rlpy.algos.CQL(**self.f_params)
         elif self.algo == "MOPO":
             self.engine = d3rlpy.dynamics.ProbabilisticEnsembleDynamics(learning_rate=1e-4, use_gpu=True)
@@ -60,9 +67,8 @@ class Model():
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
-            d3rlpy.seed(i)
-            env.reset(seed=i)
-            online_env.reset(seed=i)
+            d3rlpy.seed(i+1235)
+            random.seed(i+1235)
             self.set_engine(dataset)               
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
@@ -78,7 +84,7 @@ class Model():
     
 
 model = Model(task, algo)
-mean_results = model.train(n=20)
+mean_results = model.train(n=50)
 
 #with open(f'{algo}_{task}.txt', 'w') as f:
 #    for r in mean_results:
