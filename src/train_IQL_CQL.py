@@ -19,12 +19,11 @@ import random
 
 os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 parser = argparse.ArgumentParser()
-parser.add_argument("--task", type=str, help="task/game to be played")
-parser.add_argument("--algo", type=str, help="algorithm to be used for training")
+parser.add_argument("--arg", type=str, help="argument")
 args = parser.parse_args()
 
-task = args.task #['HalfCheetah-v4', 'Walker2d-v4', 'Ant-v4']
-algo = args.algo
+task, algo = args.arg.split() #['HalfCheetah-v4', 'Walker2d-v4', 'Ant-v4']
+#algo = args.algo
 
 #wandb.init(
 #    project=f"{algo}_{task}"
@@ -67,8 +66,8 @@ class Model():
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
-            d3rlpy.seed(i+1235)
-            random.seed(i+1235)
+            d3rlpy.seed(i+1000235)
+            random.seed(i+1000235)
             self.set_engine(dataset)               
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
