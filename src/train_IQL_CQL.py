@@ -66,8 +66,8 @@ class Model():
         dataset, env = get_d4rl(self.task)
         online_env = gym.make(self.task)
         for i in range(n):
-            d3rlpy.seed(i+10002035)
-            random.seed(i+10002035)
+            d3rlpy.seed(i+90002035)
+            random.seed(i+90002035)
             self.set_engine(dataset)               
             self.engine.fit(dataset, n_steps=n_steps, save_interval=save_interval, save_metrics=save_metrics, verbose=verbose)
             scorer = evaluate_on_environment(online_env, n_trials=1)
