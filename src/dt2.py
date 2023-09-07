@@ -24,7 +24,7 @@ os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 @dataclass
 class TrainConfig:
     # wandb params
-    project: str = "CORL_take4"
+    project: str = "CORL_take5"
     group: str = "DT-D4RL"
     name: str = "DT"
     # model params
@@ -56,7 +56,7 @@ class TrainConfig:
     training_seeds: int = 50
     checkpoints_path: Optional[str] = None
     deterministic_torch: bool = False
-    eval_seed: int = 42
+    eval_seed: int = 402
     device: str = "cuda"
 
     def __post_init__(self):
