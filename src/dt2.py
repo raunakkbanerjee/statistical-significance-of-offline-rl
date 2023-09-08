@@ -24,7 +24,7 @@ os.environ['D4RL_SUPPRESS_IMPORT_ERROR'] = '1'
 @dataclass
 class TrainConfig:
     # wandb params
-    project: str = "CORL_take5"
+    project: str = "CORL_take7"
     group: str = "DT-D4RL"
     name: str = "DT"
     # model params
@@ -408,7 +408,7 @@ def eval_rollout(
 def train(config: TrainConfig):
     # init wandb session for logging
     wandb_init(asdict(config))
-    for seed in range(config.training_seeds): #Training from scratch multiple times
+    for seed in range(26, 26+config.training_seeds): #Training from scratch multiple times
         set_seed(seed, deterministic_torch=config.deterministic_torch)
         
 
