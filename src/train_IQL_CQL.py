@@ -78,6 +78,7 @@ class Model():
                 normalized_score = online_env.get_normalized_score(scorer(self.engine))
                 f = open(f'./txt_files_4/{algo}_{task}_rollout.txt', 'a+')
                 f.write(f"{normalized_score}\n")
+                f.close()
             self.mean_results.append(normalized_score)
         return self.mean_results
     
